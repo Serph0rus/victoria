@@ -1,0 +1,45 @@
+machine 1:
+booleans
+integer equality
+general:
+    null = 0
+    if
+    while
+    for
+    foreach
+    set
+    evaluate
+map:
+    map keys to values using 2 lists
+capabilities as unique elements
+string operations
+byte type
+arrays
+file (special type of ipc/blocking array):
+    console
+    display
+parser::parse
+macros (don't actually need to do anything in c++, just create victoria functions that modify code before it is compiled)
+package operations:
+    recreate environments using standard linked lists and maps
+    environment -> sets an environment to a package list
+garbage collection
+rc containing macro-expanded os
+
+system 1:
+console repl with macros
+
+system 2:
+serialisation to disk
+
+machine 2:
+multitasking
+
+system 3:
+multitasking
+
+system 4:
+graphics
+
+machine 3:
+change lists to cells, and make lists value-terminated
