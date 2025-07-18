@@ -288,11 +288,11 @@ Value * builtin_stream(Value * * arguments, Environment * environment) {
 };
 Value * builtin_stream_read(Value * * arguments, Environment * environment) {
     if (arguments[0]->stream.is_builtin) return arguments[0]->stream.builtin.read(arguments[0]->stream.builtin.index, arguments[1]->integer, arguments[2]->integer);
-    else evaluate(new_pair(arguments[0]))
+    else evaluate(new_pair(arguments[0]->stream.user.read, new_pair(arguments[1], new_pair(arguments[2], 0))), arguments[0]->stream.user.read->function.closure);
 };
 Value * builtin_stream_write(Value * * arguments, Environment * environment) {
     if (arguments[0]->stream.is_builtin) return arguments[0]->stream.builtin.write(arguments[0]->stream.builtin.index, arguments[1]->integer, arguments[2]);
-    else // send a message and return a result
+    else evaluate(new_pair(arguments[0]->stream.user.write, new_pair(arguments[1], new_pair(arguments[2], 0))), arguments[0]->stream.user.write->function.closure);
 };
 Value * builtin_(Value * * arguments, Environment * environment) {
 

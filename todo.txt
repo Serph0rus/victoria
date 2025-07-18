@@ -1,93 +1,46 @@
 machine 1:
-booleans
-integer equality
-general:
-    null = 0
-    if
-    while
-    for
-    foreach
-    set
-    evaluate
-map:
-    map keys to values using 2 lists
-capabilities as unique elements
-string operations
-byte type
-arrays
-file (special type of ipc/blocking array):
-    console
-    display
-parser::parse
-macros (don't actually need to do anything in c++, just create victoria functions that modify code before it is compiled)
-package operations:
-    recreate environments using standard linked lists and maps
-    environment -> sets an environment to a package list
-garbage collection
-rc containing macro-expanded os
-
-system 1:
-console repl with macros
-
-system 2:
-serialisation to disk
+- booleans
+- integers
+- strings
+- streams
+- environments
+- if/else
+- while, for, foreach
+- console
+- evaluate in isolated environment
+- parser
+- read rc from file
 
 machine 2:
-multitasking
-
-system 3:
-multitasking
-
-system 4:
-graphics
+- multithreading
+- queues
+- signed capabilities
+- framebuffer
+- garbage collector
+- garbage collector also compacts by progressively reallocating objects
+- semaphores
+- debug info in functions and variables
+- log total value count
 
 machine 3:
-change lists to cells, and make lists value-terminated
+- "dump" function to serialise objects / whole system to a string
+- device drivers
+- mark objects as not present using pointer tagging, i.e. serialise to disk
 
-Value * evaluate(Value * value, Environment * environment) {
-    if (value) {
-        switch (value->type) {
-            case SymbolType: return lookup(environment, value->symbol);
-            case PairType: {
-                if (value->pair.left) {
-                    Value * function = evaluate(value->pair.left, environment);
-                    ValueType * parameter_types;
-                    unsigned long parameter_count;
-                    if (function->type == FunctionType) {
-                        parameter_types = function->function.types;
-                        parameter_count = function->function.count;
-                    } else if (function->type == BuiltinType) {
-                        parameter_types = function->builtin.types;
-                        parameter_count = function->builtin.count;
-                    } else return new_error(ApplicationError);
-                    Value * current_pair = value->pair.right;
-                    Value * * evaluated_arguments = malloc(parameter_count * sizeof(Value *));
-                    for (int i = 0; ; i++) {
-                        if (current_pair) {
-                            if (current_pair->type == PairType) {
-                                evaluated_arguments[i] = evaluate(current_pair->pair.left, environment);
-                                if (evaluated_arguments[i]->type == parameter_types[i]) {
-                                    current_pair = current_pair->pair.right;
-                                } else {
-                                    free(evaluated_arguments);
-                                    return new_error(TypeError);
-                                };
-                            } else {
-                                free(evaluated_arguments);
-                                return new_error(ManipulationError);
-                            };
-                        } else if (i == parameter_count - 1) { // we have reached the end of the list
-                            Value * result = apply(value, evaluated_arguments);
-                            free(evaluated_arguments);
-                            return result;
-                        } else {
-                            free(evaluated_arguments);
-                            return new_error(ArityError);
-                        };
-                    };
-                } else return new_error(ApplicationError);
-            } break;
-            default: return value;
-        };
-    } else return 0;
-};
+system 1:
+- repl
+- map
+- macros
+- preprocess macros
+- const-read macros, allow configurations to be read from files at compile time
+- parser generates a map between environments and symbols
+
+system 2:
+- zoe drive format
+- hat trick of running the operating system inside itself (emulate its own environment for each program)
+- desktop environment
+- display total value count as wallpaper
+
+system 3:
+- cache non-volatile expressions?
+- compile c to lisp?
