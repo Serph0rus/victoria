@@ -43,3 +43,51 @@ graphics
 
 machine 3:
 change lists to cells, and make lists value-terminated
+
+Value * evaluate(Value * value, Environment * environment) {
+    if (value) {
+        switch (value->type) {
+            case SymbolType: return lookup(environment, value->symbol);
+            case PairType: {
+                if (value->pair.left) {
+                    Value * function = evaluate(value->pair.left, environment);
+                    ValueType * parameter_types;
+                    unsigned long parameter_count;
+                    if (function->type == FunctionType) {
+                        parameter_types = function->function.types;
+                        parameter_count = function->function.count;
+                    } else if (function->type == BuiltinType) {
+                        parameter_types = function->builtin.types;
+                        parameter_count = function->builtin.count;
+                    } else return new_error(ApplicationError);
+                    Value * current_pair = value->pair.right;
+                    Value * * evaluated_arguments = malloc(parameter_count * sizeof(Value *));
+                    for (int i = 0; ; i++) {
+                        if (current_pair) {
+                            if (current_pair->type == PairType) {
+                                evaluated_arguments[i] = evaluate(current_pair->pair.left, environment);
+                                if (evaluated_arguments[i]->type == parameter_types[i]) {
+                                    current_pair = current_pair->pair.right;
+                                } else {
+                                    free(evaluated_arguments);
+                                    return new_error(TypeError);
+                                };
+                            } else {
+                                free(evaluated_arguments);
+                                return new_error(ManipulationError);
+                            };
+                        } else if (i == parameter_count - 1) { // we have reached the end of the list
+                            Value * result = apply(value, evaluated_arguments);
+                            free(evaluated_arguments);
+                            return result;
+                        } else {
+                            free(evaluated_arguments);
+                            return new_error(ArityError);
+                        };
+                    };
+                } else return new_error(ApplicationError);
+            } break;
+            default: return value;
+        };
+    } else return 0;
+};
